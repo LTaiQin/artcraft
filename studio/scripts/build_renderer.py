@@ -89,6 +89,25 @@ text = text.replace('{/* actions */}', '''{/* actions */}<a href={artifact.objec
   className="flex h-9 items-center justify-center border border-white/20 text-sm">下载渲染结果</a>''')
 (frontend / relative).write_text(text, encoding="utf-8")
 
+# The standalone editor sits beside a sidebar. Drop coordinates are page
+# coordinates, so compare them with the actual canvas bounds rather than a
+# width whose origin is zero. This also works on smaller Windows desktops.
+relative = "libs/components/pagescene/src/lib/DragAndDrop/DndAsset.ts"
+text = original(relative)
+start = text.index("  overCanvas(positionX: number, positionY: number) {")
+end = text.index("  onPointerUp(event: PointerEvent)", start)
+text = text[:start] + '''  overCanvas(positionX: number, positionY: number) {
+    const canvas = this.editor?.renderer?.domElement;
+    if (!canvas) return false;
+    const rect = canvas.getBoundingClientRect();
+    const x = positionX - window.scrollX;
+    const y = positionY - window.scrollY;
+    return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+  }
+
+''' + text[end:]
+(frontend / relative).write_text(text, encoding="utf-8")
+
 # All workspace libraries resolve to one source module instance. This prevents
 # duplicated Zustand/keybind stores from separately built dependency bundles.
 aliases = []
