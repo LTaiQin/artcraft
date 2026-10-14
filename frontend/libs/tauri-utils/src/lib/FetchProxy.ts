@@ -1,6 +1,6 @@
 import { PersonalApiFetch } from "./PersonalApiFetch";
 import { IsDesktopApp } from "./IsDesktopApp";
-import { fetch as tauriFetch } from '@tauri-apps/plugin-http'
+import { invoke } from "@tauri-apps/api/core";
 
 // TODO: Match the function signature in typescript annotations:
 // export declare function fetch(input: URL | Request | string, init?: RequestInit & ClientOptions): Promise<Response>;
@@ -20,12 +20,11 @@ export async function FetchProxy(args: any, additionalArgs: any) : Promise<Respo
     const localResponse = await PersonalApiFetch(args, additionalArgs);
     if (localResponse) return localResponse;
     if (String(args).startsWith("asset:") || String(args).includes("asset.localhost")) return fetch(args, additionalArgs);
-    // Tauri proxy fetch
-    if (additionalArgs !== undefined) {
-      return tauriFetch(args, additionalArgs);
-    } else {
-      return tauriFetch(args);
-    }
+    const method = (additionalArgs?.method || "GET").toUpperCase();
+    if (method !== "GET" && method !== "HEAD") throw new Error("此远程服务不属于已配置的个人 API");
+    const bytes = await invoke<ArrayBuffer>("load_without_cors_command", { url: String(args) });
+    return new Response(method === "HEAD" ? null : bytes);
+
   } else {
     // Browser native fetch
     if (additionalArgs !== undefined) {

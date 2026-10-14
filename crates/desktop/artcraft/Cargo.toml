@@ -24,7 +24,7 @@ tauri-build = { version = "2.6.2", features = [] }
 [features]
 default = ["personal-api"]
 personal-api = ["dep:personal_api"]
-original-cloud = ["dep:image", "dep:toml", "dep:browser_emulation", "dep:cookie_store_wrapper", "dep:artcraft_api_defs", "dep:artcraft_client", "dep:artcraft_router", "dep:build_metadata", "dep:cookie_store", "dep:enums", "dep:errors", "dep:fal_client", "dep:filesys", "dep:grok_consumer_client", "dep:uuid_utils", "dep:images", "dep:memory_store", "dep:midjourney_client", "dep:mimetypes", "dep:openai_sora_client", "dep:primitives", "dep:sqlite_tasks", "dep:tokens", "dep:url_utils", "dep:web_base64", "dep:worldlabs_consumer_client", "dep:anyhow", "dep:bytes", "dep:chrono", "dep:directories", "dep:discord-rich-presence", "dep:futures", "dep:indexmap", "dep:once_cell", "dep:os_info", "dep:rand", "dep:tempdir", "dep:tempfile", "dep:tokio-util"]
+original-cloud = ["dep:tauri-plugin-http", "dep:image", "dep:toml", "dep:browser_emulation", "dep:cookie_store_wrapper", "dep:artcraft_api_defs", "dep:artcraft_client", "dep:artcraft_router", "dep:build_metadata", "dep:cookie_store", "dep:enums", "dep:errors", "dep:fal_client", "dep:filesys", "dep:grok_consumer_client", "dep:uuid_utils", "dep:images", "dep:memory_store", "dep:midjourney_client", "dep:mimetypes", "dep:openai_sora_client", "dep:primitives", "dep:sqlite_tasks", "dep:tokens", "dep:url_utils", "dep:web_base64", "dep:worldlabs_consumer_client", "dep:anyhow", "dep:bytes", "dep:chrono", "dep:directories", "dep:discord-rich-presence", "dep:futures", "dep:indexmap", "dep:once_cell", "dep:os_info", "dep:rand", "dep:tempdir", "dep:tempfile", "dep:tokio-util"]
 
 [dependencies]
 personal_api = { path = "../../lib/personal_api", optional = true }
@@ -87,7 +87,7 @@ tokio-util = { workspace = true, optional = true }
 url.workspace = true
 
 # NB: We need to vendor this in so that we can access the cookies inside via the private API
-tauri-plugin-http = { path = "../../vendor/tauri-plugin-http" }
+tauri-plugin-http = { path = "../../vendor/tauri-plugin-http", optional = true }
 tauri-plugin-opener = "2"
 
 # # Transparent title bar on MacOS

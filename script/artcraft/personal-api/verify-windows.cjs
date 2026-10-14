@@ -48,11 +48,11 @@ const server = http.createServer(async (request, response) => {
 });
 async function launch() {
   debugPort++;
-  app = spawn(executable, [], { env: { ...process.env, ARTCRAFT_PERSONAL_DATA_DIR: dataDir, WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${debugPort} --remote-allow-origins=*` }, stdio: ['ignore', fs.openSync(path.join(root, 'native-stdout.log'), 'a'), fs.openSync(path.join(root, 'native-stderr.log'), 'a')] });
+  app = spawn(executable, [], { env: { ...process.env, ARTCRAFT_PERSONAL_DATA_DIR: dataDir, ARTCRAFT_ACCEPTANCE_LOG: path.join(root, "boot.log"), ARTCRAFT_ACCEPTANCE_BROWSER_ARGS: `--remote-debugging-port=${debugPort} --remote-allow-origins=*`, WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${debugPort} --remote-allow-origins=*` }, stdio: ['ignore', fs.openSync(path.join(root, 'native-stdout.log'), 'a'), fs.openSync(path.join(root, 'native-stderr.log'), 'a')] });
   let lastConnectionError = '';
   await until(async () => {
     if (app.exitCode !== null) throw new Error('ArtCraft exited before WebView2 was ready: ' + app.exitCode + ' · ' + fs.readFileSync(path.join(root, 'native-stderr.log'), 'utf8'));
-    try { browser = await chromium.connectOverCDP(`http://127.0.0.1:${debugPort}`); return true; } catch (error) { lastConnectionError = error.message; return false; } }, 90000).catch(error => { throw new Error(error.message + ' · CDP: ' + lastConnectionError); });
+    try { browser = await chromium.connectOverCDP(`http://127.0.0.1:${debugPort}`); return true; } catch (error) { lastConnectionError = error.message; return false; } }, 90000).catch(error => { throw new Error(error.message + ' · CDP: ' + lastConnectionError + ' · boot: ' + (fs.existsSync(path.join(root, 'boot.log')) ? fs.readFileSync(path.join(root, 'boot.log'), 'utf8') : 'no boot log')); });
   page = await until(() => browser.contexts()[0]?.pages().find(p => /tauri|localhost/.test(p.url())));
   page.on('pageerror', error => report.errors.push(error.message));
   await page.getByText('Your creative workspace', { exact: true }).waitFor();
@@ -149,6 +149,7 @@ async function generate(kind, request) {
     report.passed = true; report.mockHttpRequests = calls.length;
   } catch (error) { report.failure = error.stack; process.exitCode = 1; if (page) await screenshot('failure').catch(() => {}); }
   finally {
+    fs.writeFileSync(path.join(root, 'processes.txt'), spawnSync('powershell.exe', ['-NoProfile', '-Command', "Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'artcraft|msedgewebview2' } | Select-Object Name,ProcessId,ParentProcessId,CommandLine | Format-List"], { encoding: 'utf8' }).stdout || '');
     fs.writeFileSync(path.join(root, 'verification.json'), JSON.stringify(report, null, 2)); console.log(JSON.stringify(report));
     await close(); await new Promise(resolve => server.close(resolve));
   }
