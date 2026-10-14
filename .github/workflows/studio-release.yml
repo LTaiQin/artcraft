@@ -84,6 +84,7 @@ jobs:
             .local-qa/studio-acceptance/verification.json
             .local-qa/studio-acceptance/*.png
           if-no-files-found: ignore
+          include-hidden-files: true
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}

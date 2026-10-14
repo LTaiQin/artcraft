@@ -13,7 +13,10 @@ SOURCE = pathlib.Path(os.environ.get("ARTCRAFT_SOURCE", str(REPO / ".local-qa/ar
 
 
 def run(*args, cwd=None):
-    subprocess.run(args, cwd=cwd, check=True)
+    command = list(args)
+    if os.name == "nt" and command[0] in ("npm", "npx"):
+        command = [os.environ.get("COMSPEC", "cmd.exe"), "/d", "/c", *command]
+    subprocess.run(command, cwd=cwd, check=True)
 
 
 if not (SOURCE / ".git").exists():
@@ -55,22 +58,22 @@ draw = draw.replace(marker, marker + '''
         try { const file = await getCompositeFile(); if (file) await (adapter as any).saveCanvas(file); }
         catch (error) { (adapter as any).onError(error); }
       }}>保存画布到素材库</button>''')
-(frontend / draw_path).write_text(draw)
-(libs / "components/pagedraw/src/lib/PromptEditor/PromptEditor.tsx").write_text('export { default } from "@ltaiqin/studio-prompt";\n')
+(frontend / draw_path).write_text(draw, encoding="utf-8")
+(libs / "components/pagedraw/src/lib/PromptEditor/PromptEditor.tsx").write_text('export { default } from "@ltaiqin/studio-prompt";\n', encoding="utf-8")
 
 # Presets that refer to vendor-owned cloud tokens cannot work in an offline,
 # account-free application. Keep primitives and bundled skyboxes; user models
 # are supplied through the local adapter, without a vendor library request.
 assets = libs / "components/pagescene/src/lib/signals/demoAssets"
 for filename in ["demoCharacterItems.ts", "demoAnimationItems.ts", "demoMemeItems.ts"]:
-    relative = str((assets / filename).relative_to(frontend))
+    relative = (assets / filename).relative_to(frontend).as_posix()
     text = original(relative)
     text = re.sub(r"(export const \w+\s*:\s*MediaItem\[\]\s*=\s*)\[[\s\S]*?\];", r"\1[];", text)
-    (assets / filename).write_text(text)
+    (assets / filename).write_text(text, encoding="utf-8")
 relative = "libs/components/pagescene/src/lib/signals/demoAssets/demoAssets.ts"
 text = original(relative)
 text = re.sub(r"(export const demoObjectItems:\s*MediaItem\[\]\s*=\s*)\[[\s\S]*?\];", r"\1[];", text)
-(frontend / relative).write_text(text)
+(frontend / relative).write_text(text, encoding="utf-8")
 
 # Still/video output can be kept in the local library without any sign-in or
 # cloud upload. Both save and download buttons operate on the local Blob.
@@ -84,7 +87,7 @@ text = text.replace("Upload &amp; continue", "保存到本地素材库")
 text = text.replace("Uploading to gallery…", "正在保存到本机…")
 text = text.replace('{/* actions */}', '''{/* actions */}<a href={artifact.objectUrl} download={artifact.fileName}
   className="flex h-9 items-center justify-center border border-white/20 text-sm">下载渲染结果</a>''')
-(frontend / relative).write_text(text)
+(frontend / relative).write_text(text, encoding="utf-8")
 
 # All workspace libraries resolve to one source module instance. This prevents
 # duplicated Zustand/keybind stores from separately built dependency bundles.
@@ -92,12 +95,12 @@ aliases = []
 for package in libs.rglob("package.json"):
     if "node_modules" in package.parts:
         continue
-    definition = json.loads(package.read_text())
+    definition = json.loads(package.read_text(encoding="utf-8"))
     name = definition.get("name", "")
     entry = package.parent / "src/index.ts"
     if name.startswith("@storyteller/") and entry.exists():
-        aliases.append({"find": name, "replacement": str(entry)})
-aliases.append({"find": "@ltaiqin/studio-prompt", "replacement": str(host / "src/CanvasPrompt.tsx")})
+        aliases.append({"find": name, "replacement": entry.as_posix()})
+aliases.append({"find": "@ltaiqin/studio-prompt", "replacement": (host / "src/CanvasPrompt.tsx").as_posix()})
 aliases.sort(key=lambda x: len(x["find"]), reverse=True)
 public = frontend / "apps/artcraft/app/public"
 config = '''import { defineConfig } from 'vite';
@@ -110,20 +113,20 @@ export default defineConfig({
   worker: { format: 'es', plugins: () => [wasm()] },
   build: { outDir: OUTPUT, emptyOutDir: true, target: 'es2022', chunkSizeWarningLimit: 1600 },
 });'''
-for marker, value in [("ROOT", str(host)), ("PUBLIC", str(public)), ("ALIASES", aliases), ("OUTPUT", str(HERE / "renderer-dist"))]:
+for marker, value in [("ROOT", host.as_posix()), ("PUBLIC", public.as_posix()), ("ALIASES", aliases), ("OUTPUT", (HERE / "renderer-dist").as_posix())]:
     config = config.replace(marker, json.dumps(value))
-(host / "vite.config.mjs").write_text(config)
-(host / "index.html").write_text('''<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LTaiQin Studio · ArtCraft</title></head><body><div id="root"></div><script type="module" src="/src/App.tsx"></script></body></html>''')
-tailwind = (frontend / "apps/artcraft/tailwind.config.ts").read_text()
+(host / "vite.config.mjs").write_text(config, encoding="utf-8")
+(host / "index.html").write_text('''<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LTaiQin Studio · ArtCraft</title></head><body><div id="root"></div><script type="module" src="/src/App.tsx"></script></body></html>''', encoding="utf-8")
+tailwind = (frontend / "apps/artcraft/tailwind.config.ts").read_text(encoding="utf-8")
 start = tailwind.index("  content: [")
 end = tailwind.index("  theme:", start)
-tailwind = tailwind[:start] + "  content: " + json.dumps([str(host / "src/**/*.{ts,tsx}"), str(libs / "**/src/**/*.{ts,tsx}")]) + ",\n" + tailwind[end:]
-(host / "tailwind.config.ts").write_text(tailwind)
-(host / "postcss.config.cjs").write_text("module.exports={plugins:{tailwindcss:{config:" + json.dumps(str(host / "tailwind.config.ts")) + "},autoprefixer:{}}};")
+tailwind = tailwind[:start] + "  content: " + json.dumps([(host / "src/**/*.{ts,tsx}").as_posix(), (libs / "**/src/**/*.{ts,tsx}").as_posix()]) + ",\n" + tailwind[end:]
+(host / "tailwind.config.ts").write_text(tailwind, encoding="utf-8")
+(host / "postcss.config.cjs").write_text("module.exports={plugins:{tailwindcss:{config:" + json.dumps((host / "tailwind.config.ts").as_posix()) + "},autoprefixer:{}}};", encoding="utf-8")
 run("npx", "vite", "build", "--config", str(host / "vite.config.mjs"), cwd=frontend)
 third_party = HERE / "THIRD_PARTY"
 third_party.mkdir(exist_ok=True)
 for name in ["LICENSE-MIT", "LICENSE-APACHE", "NOTICE"]:
     shutil.copy2(SOURCE / name, third_party / ("ArtCraft-" + name))
-(third_party / "SOURCE.txt").write_text("https://github.com/storytold/artcraft\nCommit: " + PIN + "\n")
+(third_party / "SOURCE.txt").write_text("https://github.com/storytold/artcraft\nCommit: " + PIN + "\n", encoding="utf-8")
 print("Desktop renderer and bundled attribution ready:", HERE / "renderer-dist")
