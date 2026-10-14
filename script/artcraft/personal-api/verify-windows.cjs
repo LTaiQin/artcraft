@@ -103,7 +103,7 @@ async function generate(kind, request) {
     await page.keyboard.press('Escape');
     await open(/^Create Image/);
     await page.locator('textarea,[contenteditable=true]').first().fill('Native image UI fixture');
-    await page.getByRole('button', { name: /^Generate/ }).last().click();
+    await page.locator('button:has(svg.lucide-arrow-up)').last().click({ position: { x: 18, y: 5 } });
     await until(async () => (await jobs()).some(j => j.task_type === 'image_generation' && j.task_status === 'complete_success'));
     const image = (await jobs()).find(j => j.task_type === 'image_generation').completed_item.primary_media_file;
     assert((await page.evaluate(async url => { const r = await fetch(url); return (await r.arrayBuffer()).byteLength; }, image.cdn_url)) > 100);
@@ -119,7 +119,7 @@ async function generate(kind, request) {
     await open(/^Create Video/); await screenshot('video');
     await generate('video', { model: 'seedance_2p5', prompt: 'Native video fixture', duration_seconds: 5 });
     await open(/^Create Audio/); await page.locator('textarea,[contenteditable=true]').first().fill('你好，原版语音测试');
-    await page.getByRole('button', { name: /^Generate/ }).last().click();
+    await page.locator('button:has(svg.lucide-arrow-up)').last().click({ position: { x: 18, y: 5 } });
     await until(async () => (await jobs()).some(j => j.task_type === 'audio_generation' && j.task_status === 'complete_success'));
     await screenshot('audio');
     report.checks.push('Seedance 任务创建查询下载、原版音频按钮和百炼 TTS');
