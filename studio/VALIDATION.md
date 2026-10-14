@@ -17,9 +17,13 @@
 
 Windows 和 Linux Electron 44.7.2 运行文件均通过该版本官方 `SHASUMS256.txt` 校验。Windows 产物为完整 x64 ZIP，包含 EXE、运行资源、`app.asar`、说明和上游许可证。
 
+2026-10-14 补充：独立仓库已在 Windows Server 2025 的 GitHub runner 上完成全部原生桌面验收，并在 Windows 上打包发布 [studio-v1.0.0](https://github.com/LTaiQin/artcraft/releases/tag/studio-v1.0.0)。[发布与测试任务](https://github.com/LTaiQin/artcraft/actions/runs/38563995094)全部成功，包含 10 项后端测试、9 组桌面验收、模型重开、实际渲染 PNG 和任务恢复。
+
+同一版本也在 Linux 的 1024×681 内容窗口中复测通过，修复了侧栏偏移导致的 3D 右侧拖入边界问题。真实付费 API 仍未调用。
+
 ## 尚未验证
 
-- 本环境为 Linux。Windows EXE 通过交叉构建和文件结构校验，尚未在真实 Windows 系统打开，因此不能把 Linux Electron 实测等同于 Windows 原生运行验证。
+- 用户个人 Windows 电脑的驱动、显示缩放和网络环境尚未验证；GitHub Windows runner 的结果不能代替具体设备的实际使用确认。
 - 没有用户 API Key，未发起真实付费图片、视频或语音生成。云端模型权限、地域权限、额度、内容审核、质量和真实时延仍须使用者的有效账号验证。
 - 实测了自包含 GLB 和单帧 PNG 渲染；没有全面验收所有骨骼、复杂动画、SPZ 大场景或长视频录制。其编码性能由本机硬件决定。
 - 没有通过完整上游仓库的 TypeScript 项目检查；生产编译和实际操作通过不代表所有原仓库模块均已验证。
@@ -31,3 +35,5 @@ Windows 和 Linux Electron 44.7.2 运行文件均通过该版本官方 `SHASUMS2
 运行后端测试：`npm --prefix studio test`。完整桌面验收脚本和调用要求见 [README](README.md)。
 
 桌面源码已迁移至独立仓库 `LTaiQin/artcraft` 的 `studio/` 目录。迁移未改变生成协议和编辑器代码；构建脚本的工作目录已适配独立仓库。历史验收数据仍保留在原本机 QA 目录。
+
+Windows Release ZIP SHA256：`e0b71e89f41b9fc8c3768af406fb43351f2a8f2c35eea8414f4e963ff4ca0106`，文件大小 181857558 字节。
