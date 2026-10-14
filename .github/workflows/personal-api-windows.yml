@@ -46,6 +46,13 @@ jobs:
         env:
           ARTCRAFT_GIT_SHA: ${{ github.sha }}
         run: cargo build -p artcraft --release --locked
+      - name: Install Microsoft WebView2 runtime for native acceptance
+        shell: pwsh
+        run: |
+          $installer = Join-Path $env:RUNNER_TEMP 'MicrosoftEdgeWebview2Setup.exe'
+          Invoke-WebRequest 'https://go.microsoft.com/fwlink/p/?LinkId=2124703' -OutFile $installer
+          $process = Start-Process $installer -ArgumentList '/silent','/install' -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "WebView2 installer exited with $($process.ExitCode)" }
       - name: Prepare acceptance fixtures
         run: node script/artcraft/personal-api/make-fixtures.cjs .local-qa/personal-api-windows/fixtures
       - name: Test actual Windows application

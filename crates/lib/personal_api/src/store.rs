@@ -16,7 +16,7 @@ pub struct Store {
   state: Arc<Mutex<Data>>,
   keys: Arc<Mutex<BTreeMap<String, String>>>,
 }
-#[derive(Default, Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 struct Data {
   #[serde(default)]
   configs: BTreeMap<String, ProviderConfig>,
@@ -26,6 +26,11 @@ struct Data {
   jobs: Vec<Job>,
   #[serde(default = "default_preferences")]
   preferences: Value,
+}
+impl Default for Data {
+  fn default() -> Self {
+    Self { configs: BTreeMap::new(), assets: Vec::new(), jobs: Vec::new(), preferences: default_preferences() }
+  }
 }
 #[derive(Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -79,6 +84,9 @@ impl Store {
   pub fn open(root: PathBuf) -> Result<Self> {
     fs::create_dir_all(root.join("assets")).map_err(|e| e.to_string())?;
     let mut data: Data = read_json(&root.join("library.json"))?.unwrap_or_default();
+    if !data.preferences.is_object() {
+      data.preferences = default_preferences();
+    }
     for (kind, config) in defaults() {
       data.configs.entry(kind).or_insert(config);
     }

@@ -48,8 +48,11 @@ const server = http.createServer(async (request, response) => {
 });
 async function launch() {
   debugPort++;
-  app = spawn(executable, [], { env: { ...process.env, ARTCRAFT_PERSONAL_DATA_DIR: dataDir, WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${debugPort} --remote-allow-origins=*` }, stdio: 'ignore' });
-  await until(async () => { try { browser = await chromium.connectOverCDP(`http://127.0.0.1:${debugPort}`); return true; } catch { return false; } }, 90000);
+  app = spawn(executable, [], { env: { ...process.env, ARTCRAFT_PERSONAL_DATA_DIR: dataDir, WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${debugPort} --remote-allow-origins=*` }, stdio: ['ignore', fs.openSync(path.join(root, 'native-stdout.log'), 'a'), fs.openSync(path.join(root, 'native-stderr.log'), 'a')] });
+  let lastConnectionError = '';
+  await until(async () => {
+    if (app.exitCode !== null) throw new Error('ArtCraft exited before WebView2 was ready: ' + app.exitCode + ' · ' + fs.readFileSync(path.join(root, 'native-stderr.log'), 'utf8'));
+    try { browser = await chromium.connectOverCDP(`http://127.0.0.1:${debugPort}`); return true; } catch (error) { lastConnectionError = error.message; return false; } }, 90000).catch(error => { throw new Error(error.message + ' · CDP: ' + lastConnectionError); });
   page = await until(() => browser.contexts()[0]?.pages().find(p => /tauri|localhost/.test(p.url())));
   page.on('pageerror', error => report.errors.push(error.message));
   await page.getByText('Your creative workspace', { exact: true }).waitFor();

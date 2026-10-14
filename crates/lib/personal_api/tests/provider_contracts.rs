@@ -12,6 +12,7 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 fn local_library_upload_scene_filter_and_pagination_survive_restart() {
   let dir = tempfile::tempdir().unwrap();
   let store = Store::open(dir.path().into()).unwrap();
+  assert_eq!(store.preferences().unwrap()["preferred_download_directory"]["system"], "downloads");
   let image = store.add_asset(b"image-fixture", "test.png", "image", "image/png", "upload", json!({})).unwrap();
   let scene = store.add_asset(br#"{"scene":"fixture"}"#, "Scene.json", "scene", "application/json", "upload", json!({})).unwrap();
   let req = |path: &str| LocalRequest { url: format!("https://personal.artcraft.local{path}"), method: "GET".into(), body: Value::Null, files: vec![] };
