@@ -105,3 +105,13 @@ windows/sqlite/sqlite3.lib
 crates/desktop/src-tauri/*.dll
 windows_dlls/
 
+
+# Personal Studio build and local-only data
+/.local-qa/
+/studio/renderer-dist/
+/studio/release/
+/studio/THIRD_PARTY/
+*.env
+*.key
+*.pem
+studio.json

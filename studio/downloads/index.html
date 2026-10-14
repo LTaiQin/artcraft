@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>LTaiQin Studio · Windows 桌面创作</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#f7f7f2;color:#20271d;font-family:system-ui,"Microsoft YaHei",sans-serif}a{color:inherit;text-decoration:none}nav{display:flex;justify-content:space-between;padding:24px 6vw;border-bottom:1px solid #daddd0;font-size:12px}nav span{font:12px ui-monospace,monospace;letter-spacing:.16em}main{max-width:1140px;margin:auto;padding:64px 32px}.kicker{font:10px ui-monospace,monospace;letter-spacing:.13em;color:#8a9380}h1{font-weight:500;letter-spacing:-.05em;font-size:clamp(40px,6vw,72px);line-height:1.2;margin:26px 0}h1 em{color:#7a896b;font-style:normal}.intro{font-size:15px;color:#7a8271;line-height:1.9}.actions{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin:32px 0}.download{background:#718363;color:#fff;padding:16px 23px;border-radius:4px;font-size:13px}.guide{font-size:12px;color:#697a59}.meta{font:10px ui-monospace,monospace;color:#8b9481}img{display:block;width:100%;border:1px solid #daddd0;border-radius:6px;margin:40px 0}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:25px;border-top:1px solid #daddd0;padding-top:32px}h2{font-size:18px;font-weight:500}.features p,.steps{color:#7a8271;font-size:12px;line-height:1.9}.steps{margin-top:32px;border-top:1px solid #daddd0;padding-top:25px}.steps b{color:#475b39}footer{font-size:10px;color:#909783;line-height:1.9;margin-top:30px}footer a{text-decoration:underline}.hash{overflow-wrap:anywhere;font:10px/1.8 ui-monospace,monospace}@media(max-width:650px){main{padding:40px 22px}.features{grid-template-columns:1fr;gap:5px}nav{padding:20px}nav span{font-size:9px}}
+  </style>
+</head>
+<body>
+  <nav><a href="https://ltaiqin.com/">← 个人主页</a><span>LT. / DESKTOP STUDIO</span><a href="/">控制台 ↗</a></nav>
+  <main>
+    <p class="kicker">YOUR IDEAS. YOUR COMPUTER. YOUR APIs.</p>
+    <h1>把创作，<br><em>留在你身边。</em></h1>
+    <p class="intro">Windows 桌面工作台。画布和 3D 渲染在本机，<br>图片、视频和语音生成，接入你自己的云端 API。</p>
+    <div class="actions"><a class="download" href="https://github.com/LTaiQin/artcraft/releases">前往 GitHub Releases ↓</a><a class="guide" href="使用说明.md">查看使用说明 ↗</a><span class="meta">V1.0.0 / X64 / 免安装 ZIP</span></div>
+    <img src="workspace.png" alt="LTaiQin Studio 桌面工作台">
+    <div class="features">
+      <section><h2>画布与场景</h2><p>使用 ArtCraft 编辑引擎，绘制、图层、物体、镜头与时间轴。支持本地 GLB 模型和渲染结果保存。</p></section>
+      <section><h2>个人创作 API</h2><p>GPT Image 2.5、Seedance 2.5、百炼 Qwen TTS。接口地址、模型 ID 和密钥均可自行设置。</p></section>
+      <section><h2>素材留在本机</h2><p>无需 ArtCraft 账号，不下载 AI 模型。视频任务保留 ID，重启后可继续查询。</p></section>
+    </div>
+    <p class="steps"><b>第一次使用</b>：完整解压 ZIP，双击「LTaiQin Studio.exe」，在「API 设置」填写服务商密钥。画布与 3D 基础编辑无需密钥；生成使用你的服务商额度。</p>
+    <footer>已完成本地 Electron 操作与模拟 API 验收。Windows 包由 Linux 交叉构建，尚未在真实 Windows 电脑运行；没有进行真实付费生成。此版本没有代码签名。<br>查看 <a href="验证记录.md">验证记录</a> · <a href="SHA256.txt">下载校验值</a> · <a href="https://github.com/storytold/artcraft">ArtCraft 原项目</a></footer>
+  </main>
+</body>
+</html>

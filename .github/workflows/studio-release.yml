@@ -1,0 +1,97 @@
+name: Build and release LTaiQin Studio
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'studio/**'
+      - '.github/workflows/studio-release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ltaiqin-studio-release
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    if: github.repository == 'LTaiQin/artcraft'
+    runs-on: windows-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            studio
+            .github/workflows
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: studio/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install desktop dependencies
+        working-directory: studio
+        run: npm ci --no-audit --no-fund
+      - name: Build pinned ArtCraft editing engine
+        working-directory: studio
+        run: npm run build:renderer
+      - name: Verify backend contracts
+        working-directory: studio
+        run: npm test
+      - name: Install acceptance tooling
+        working-directory: studio
+        run: npm install --no-save --package-lock=false playwright
+      - name: Verify desktop on Windows against local mock APIs
+        working-directory: studio
+        run: |
+          node test/make-fixtures.cjs ../.local-qa/studio-fixtures
+          $env:PLAYWRIGHT_MODULE = Join-Path $pwd 'node_modules/playwright'
+          $env:STUDIO_TEST_EXECUTABLE = node -p "require('electron')"
+          $env:STUDIO_TEST_OUTPUT = Join-Path $pwd '../.local-qa/studio-acceptance'
+          $env:STUDIO_TEST_FIXTURES = Join-Path $pwd '../.local-qa/studio-fixtures'
+          node test/verify-desktop.cjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Record native Windows validation in package
+        run: |
+          $validation = Get-Content studio/VALIDATION.md -Raw -Encoding utf8
+          $validation = $validation.Replace('Windows EXE 通过交叉构建和文件结构校验，尚未在真实 Windows 系统打开，因此不能把 Linux Electron 实测等同于 Windows 原生运行验证。', '本 Release 已在 GitHub 的 Windows runner 上完成原生 Electron 启动、编辑器操作及本地模拟 API 验收，并在 Windows 上打包。个人电脑的驱动及网络环境仍需实际使用确认。')
+          Set-Content studio/VALIDATION.md $validation -Encoding utf8
+      - name: Package Windows application
+        working-directory: studio
+        run: npm run package:windows
+      - name: Collect checksums and documentation
+        run: |
+          $zip = Get-ChildItem studio/release/LTaiQin-Studio-*-Windows-x64.zip | Select-Object -First 1
+          if (!$zip -or $zip.Length -lt 1000000) { throw 'Missing Windows archive' }
+          $hash = (Get-FileHash $zip.FullName -Algorithm SHA256).Hash.ToLower()
+          Set-Content studio/release/SHA256.txt "$hash  $($zip.Name)" -Encoding ascii
+          Copy-Item studio/README.md studio/release/README.md
+          Copy-Item studio/VALIDATION.md studio/release/VALIDATION.md
+      - name: Retain acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: studio-windows-acceptance
+          path: |
+            .local-qa/studio-acceptance/verification.json
+            .local-qa/studio-acceptance/*.png
+          if-no-files-found: ignore
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = (Get-Content studio/package.json | ConvertFrom-Json).version
+          $tag = "studio-v$version"
+          $zip = (Get-ChildItem studio/release/LTaiQin-Studio-*-Windows-x64.zip | Select-Object -First 1).FullName
+          gh release view $tag --repo $env:GITHUB_REPOSITORY 2>$null
+          if ($LASTEXITCODE -eq 0) { throw "Release $tag already exists; bump studio/package.json before publishing" }
+          gh release create $tag $zip studio/release/SHA256.txt studio/release/README.md studio/release/VALIDATION.md --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title "LTaiQin Studio $version · Windows" --notes-file studio/RELEASE_NOTES.md
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

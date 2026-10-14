@@ -1,0 +1,34 @@
+{
+  "name": "ltaiqin-artcraft-studio",
+  "version": "1.0.0",
+  "description": "Local ArtCraft editing with personal OpenAI, Seedance and DashScope APIs",
+  "author": "LTaiQin",
+  "license": "MIT",
+  "private": true,
+  "main": "main/main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/*.test.cjs",
+    "build:renderer": "python3 scripts/build_renderer.py",
+    "package:windows": "electron-builder --win --x64",
+    "package:linux": "electron-builder --linux --x64 --dir"
+  },
+  "devDependencies": {
+    "electron": "44.7.2",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "com.ltaiqin.artcraft.studio",
+    "productName": "LTaiQin Studio",
+    "directories": { "output": "release" },
+    "files": ["main/**/*", "renderer-dist/**/*", "package.json", "THIRD_PARTY/**/*", "README.md", "VALIDATION.md"],
+    "asar": true,
+    "extraFiles": [{ "from": "README.md", "to": "使用说明.md" }, { "from": "VALIDATION.md", "to": "验证记录.md" }],
+    "win": {
+      "target": [{ "target": "zip", "arch": ["x64"] }],
+      "signAndEditExecutable": false,
+      "artifactName": "LTaiQin-Studio-${version}-Windows-x64.zip"
+    },
+    "linux": { "target": "dir", "category": "Graphics" }
+  }
+}

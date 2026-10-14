@@ -1,3 +1,23 @@
+# LTaiQin Studio · 个人桌面创作版
+
+这是个人 ArtCraft 仓库。Windows 桌面版使用自定义 API，无需 ArtCraft 登录，也不下载 AI 模型。支持本机画布 / 3D 编辑与渲染，以及 GPT Image 2.5、Seedance 2.5 和阿里云百炼 Qwen TTS。
+
+- [下载 Windows 免安装版](https://github.com/LTaiQin/artcraft/releases)
+- [个人版源码与使用说明](studio/README.md)
+- [验证记录和当前测试边界](studio/VALIDATION.md)
+
+```bash
+cd studio
+npm ci
+npm run build:renderer
+npm test
+npm run package:windows
+```
+
+API 地址、模型 ID 和密钥在应用的「API 设置」中配置。个人版宿主位于 `studio/`；本仓库仍保留上游 ArtCraft 源码及许可，下面是原项目说明。
+
+---
+
 <h1 align="center">ArtCraft</h1>
 <p align="center"><strong>The IDE for artists.</strong></p>
 
