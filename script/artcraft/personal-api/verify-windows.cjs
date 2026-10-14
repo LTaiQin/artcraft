@@ -53,7 +53,10 @@ async function launch() {
   await until(async () => {
     if (app.exitCode !== null) throw new Error('ArtCraft exited before WebView2 was ready: ' + app.exitCode + ' · ' + fs.readFileSync(path.join(root, 'native-stderr.log'), 'utf8'));
     try { browser = await chromium.connectOverCDP(`http://127.0.0.1:${debugPort}`); return true; } catch (error) { lastConnectionError = error.message; return false; } }, 90000).catch(error => { throw new Error(error.message + ' · CDP: ' + lastConnectionError + ' · boot: ' + (fs.existsSync(path.join(root, 'boot.log')) ? fs.readFileSync(path.join(root, 'boot.log'), 'utf8') : 'no boot log')); });
-  page = await until(() => browser.contexts()[0]?.pages().find(p => /tauri|localhost/.test(p.url())));
+  const session = await browser.newBrowserCDPSession();
+  fs.writeFileSync(path.join(root, 'cdp-targets.json'), JSON.stringify(await session.send('Target.getTargets'), null, 2));
+  fs.writeFileSync(path.join(root, 'cdp-pages.json'), JSON.stringify(browser.contexts().map(c => c.pages().map(p => p.url())), null, 2));
+  page = await until(() => browser.contexts().flatMap(c => c.pages())[0]);
   page.on('pageerror', error => report.errors.push(error.message));
   await page.getByText('Your creative workspace', { exact: true }).waitFor();
   await page.waitForFunction(() => !!window.__TAURI__?.core?.invoke);
