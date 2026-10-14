@@ -22,6 +22,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2.6.2", features = [] }
 
 [features]
+custom-protocol = ["tauri/custom-protocol"]
 default = ["personal-api"]
 personal-api = ["dep:personal_api"]
 original-cloud = ["dep:tauri-plugin-http", "dep:image", "dep:toml", "dep:browser_emulation", "dep:cookie_store_wrapper", "dep:artcraft_api_defs", "dep:artcraft_client", "dep:artcraft_router", "dep:build_metadata", "dep:cookie_store", "dep:enums", "dep:errors", "dep:fal_client", "dep:filesys", "dep:grok_consumer_client", "dep:uuid_utils", "dep:images", "dep:memory_store", "dep:midjourney_client", "dep:mimetypes", "dep:openai_sora_client", "dep:primitives", "dep:sqlite_tasks", "dep:tokens", "dep:url_utils", "dep:web_base64", "dep:worldlabs_consumer_client", "dep:anyhow", "dep:bytes", "dep:chrono", "dep:directories", "dep:discord-rich-presence", "dep:futures", "dep:indexmap", "dep:once_cell", "dep:os_info", "dep:rand", "dep:tempdir", "dep:tempfile", "dep:tokio-util"]

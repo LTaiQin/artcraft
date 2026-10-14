@@ -45,7 +45,7 @@ jobs:
       - name: Build original Tauri desktop
         env:
           ARTCRAFT_GIT_SHA: ${{ github.sha }}
-        run: cargo build -p artcraft --release --locked
+        run: cargo build -p artcraft --release --locked --features custom-protocol
       - name: Install Microsoft WebView2 runtime for native acceptance
         shell: pwsh
         run: |

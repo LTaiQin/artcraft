@@ -43,7 +43,7 @@ python script/artcraft/personal-api/verify-original-ui.py
 cd frontend && npm ci
 cd apps/artcraft && npm run build -- --emptyOutDir
 cd ../../..
-cargo build -p artcraft --release --locked
+cargo build -p artcraft --release --locked --features custom-protocol
 ```
 
 Windows 工作流在发布前验证原版界面源码、API 协议、本地数据、实际 Tauri 窗口、Windows 密钥加密和视频任务重启恢复。验收使用本机模拟接口，不消耗真实 API 额度。没有服务商密钥的情况下，不能宣称已经通过付费生成测试。
