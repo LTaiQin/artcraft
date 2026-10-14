@@ -14,7 +14,7 @@ import {
   GenerateImageRequest,
   LoadWithoutCors,
 } from "@storyteller/tauri-api";
-import { FetchProxy } from "@storyteller/tauri-utils";
+import { FetchProxy as fetch, FetchProxy } from "@storyteller/tauri-utils";
 import {
   MediaFilesApi,
   StorytellerApiHostStore,

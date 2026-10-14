@@ -314,30 +314,26 @@ export function useOmniGenAudioModels(): {
   const [error, setError] = useState<string | null>(audioModelsError);
 
   useEffect(() => {
-    if (audioModelsCache) {
-      setModels(audioModelsCache);
-      setIsLoading(false);
-      setError(null);
-      return;
-    }
-
     const onReady = () => {
       setIsLoading(false);
-      if (audioModelsCache) {
-        setModels(audioModelsCache);
-        setError(null);
-      } else {
-        setError(audioModelsError);
-      }
+      setModels(audioModelsCache ?? []);
+      setError(audioModelsError);
     };
-
-    audioModelsListeners.push(onReady);
-    fetchAudioModelsOnce();
-
+    const subscribe = () => {
+      audioModelsListeners.push(onReady);
+      fetchAudioModelsOnce();
+    };
+    if (audioModelsCache) onReady(); else subscribe();
+    const reload = () => {
+      audioModelsCache = null;
+      audioModelsError = null;
+      setIsLoading(true);
+      subscribe();
+    };
+    window.addEventListener("personal-api-config-changed", reload);
     return () => {
-      audioModelsListeners = audioModelsListeners.filter(
-        (cb) => cb !== onReady,
-      );
+      window.removeEventListener("personal-api-config-changed", reload);
+      audioModelsListeners = audioModelsListeners.filter((cb) => cb !== onReady);
     };
   }, []);
 

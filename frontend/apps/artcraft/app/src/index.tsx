@@ -12,15 +12,21 @@ import { pageHeight, pageWidth, persistLogin } from "~/signals";
 import { SyncStorytellerApiConfig } from "./api/SyncStorytellerApiConfig";
 import { posthog } from "posthog-js";
 import { SoundManager } from "@storyteller/soundboard";
+import { ModelPage, useClassyModelSelectorStore } from "@storyteller/ui-model-selector";
 import { useModelsStore } from "@storyteller/tauri-api";
+
+useClassyModelSelectorStore.setState({
+  selectedProviders: Object.fromEntries(Object.values(ModelPage).map((page) => [page, {}])),
+});
 
 // TODO(bt,2025-04-19): Make these configurable
 const ENV = {
-  GOOGLE_API: "https://studio.storyteller.ai",
-  FUNNEL_API: "https://studio.storyteller.ai",
+  UPLOAD_API_VIDEO: "https://personal.artcraft.local",
+  GOOGLE_API: "https://personal.artcraft.local",
+  FUNNEL_API: "https://personal.artcraft.local",
   CDN_API: "https://cdn-2.fakeyou.com",
-  GRAVATAR_API: "https://studio.storyteller.ai",
-  DEPLOY_PRIME_URL: "https://studio.storyteller.ai",
+  GRAVATAR_API: "https://personal.artcraft.local",
+  DEPLOY_PRIME_URL: "https://personal.artcraft.local",
 };
 
 const GlobalSettingsManager = ({ env }: { env: Record<string, string> }) => {
@@ -48,7 +54,7 @@ const GlobalSettingsManager = ({ env }: { env: Record<string, string> }) => {
     if (import.meta.env.DEV) {
       return;
     }
-    PostHogInit();
+    // Personal desktop: no cloud account analytics or credentials.
   }, [env]);
 
   // Apply stored theme early on mount
@@ -90,7 +96,13 @@ const GlobalSettingsManager = ({ env }: { env: Record<string, string> }) => {
   // The store is already seeded with the static overlay, so a failure here is a
   // no-op (the UI keeps the overlay models).
   useEffect(() => {
-    void useModelsStore.getState().loadModelsFromBackend();
+    void useModelsStore.getState().loadModelsFromBackend().then(() => {
+      const { imageModels, videoModels } = useModelsStore.getState();
+      const selector = useClassyModelSelectorStore.getState();
+      const image = imageModels.find((model) => !model.tauriId.endsWith("_inpaint"));
+      if (image) for (const page of [ModelPage.TextToImage, ModelPage.Canvas2D, ModelPage.Stage3D, ModelPage.ImageEditor, ModelPage.Angles]) selector.setSelectedModel(page, image);
+      if (videoModels[0]) selector.setSelectedModel(ModelPage.ImageToVideo, videoModels[0]);
+    });
   }, []);
 
   return null;

@@ -1,3 +1,4 @@
+import { PersonalApiFetch } from "./PersonalApiFetch";
 import { IsDesktopApp } from "./IsDesktopApp";
 import { fetch as tauriFetch } from '@tauri-apps/plugin-http'
 
@@ -14,8 +15,11 @@ import { fetch as tauriFetch } from '@tauri-apps/plugin-http'
 /// former, we replace Fetch with the Tauri fetch. If the latter, we dispatch
 /// to the normal browser fetch.
 
-export function FetchProxy(args: any, additionalArgs: any) : Promise<Response> {
+export async function FetchProxy(args: any, additionalArgs: any) : Promise<Response> {
   if (IsDesktopApp()) {
+    const localResponse = await PersonalApiFetch(args, additionalArgs);
+    if (localResponse) return localResponse;
+    if (String(args).startsWith("asset:") || String(args).includes("asset.localhost")) return fetch(args, additionalArgs);
     // Tauri proxy fetch
     if (additionalArgs !== undefined) {
       return tauriFetch(args, additionalArgs);

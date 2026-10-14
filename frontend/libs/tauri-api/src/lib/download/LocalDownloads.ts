@@ -1,3 +1,4 @@
+import { invoke } from "@tauri-apps/api/core";
 
 import { download } from "@tauri-apps/plugin-upload";
 import { open, save } from "@tauri-apps/plugin-dialog";
@@ -57,7 +58,7 @@ export const pickDownloadDirectory = async (): Promise<string | null> => {
 
 /** Downloads `url` to an explicit absolute filesystem path. */
 export const downloadUrlToPath = async (url: string, path: string) => {
-  await download(url, path);
+  await invoke("personal_download_to_path_command", { url, path });
 };
 
 export const downloadFileFromUrl = async (url: string, _mediaClass?: string, model?: string) => {
@@ -69,7 +70,7 @@ export const downloadFileFromUrl = async (url: string, _mediaClass?: string, mod
       return;
     }
     if (typeof chosen === "string") {
-      await download(url, chosen);
+      await invoke("personal_download_to_path_command", { url, path: chosen });
     } else {
       await DownloadUrl(url, { model });
     }

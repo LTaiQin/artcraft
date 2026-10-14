@@ -1,13 +1,13 @@
 {
   "$schema": "https://schema.tauri.app/config/2.0.0-rc",
   "productName": "ArtCraft",
-  "version": "0.42.0",
-  "identifier": "ai.artcraft.app",
+  "version": "0.42.1",
+  "identifier": "com.ltaiqin.artcraft.personal",
   "build": {
     "frontendDist": "../../../frontend/apps/artcraft/dist",
     "devUrl": "http://localhost:5173",
     "beforeDevCommand": "nx run artcraft:dev",
-    "beforeBuildCommand": "npx nx run artcraft:build"
+    "beforeBuildCommand": ""
   },
   "app": {
     "withGlobalTauri": true,
@@ -15,7 +15,9 @@
     "security": {
       "assetProtocol": {
         "enable": true,
-        "scope": ["**"]
+        "scope": [
+          "$APPDATA/**"
+        ]
       },
       "csp": {
         "default-src": [
@@ -47,7 +49,12 @@
           "https://www.google-analytics.com",
           "https://www.googletagmanager.com",
           "ipc://localhost",
-          "tauri://localhost"
+          "tauri://localhost",
+          "http://asset.localhost",
+          "asset:",
+          "https://*",
+          "http://localhost:*",
+          "http://127.0.0.1:*"
         ],
         "font-src": "*",
         "img-src": [
@@ -91,19 +98,35 @@
           "https://fonts.googleapis.com",
           "ipc://localhost",
           "tauri://localhost"
+        ],
+        "media-src": [
+          "'self'",
+          "asset:",
+          "http://asset.localhost",
+          "https://asset.localhost",
+          "blob:",
+          "data:",
+          "https://*"
         ]
       }
     }
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": [
+      "nsis"
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
   }
 }

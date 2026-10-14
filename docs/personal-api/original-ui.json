@@ -1,0 +1,41 @@
+{
+  "official_commit": "d4e4ac69bbd93d237eaf5d0260bc6a5ff3a5e373",
+  "protected": {
+    "frontend/libs/components/pagedraw/": {
+      "files": 38,
+      "sha256": "e26d7626a069b1b9a92b1569af54b727496ee629bb36aed71813d73ac9c73dcb"
+    },
+    "frontend/libs/components/pagescene/": {
+      "files": 214,
+      "sha256": "43c4373bda46589ae03afdf4e155b55d9a7cc76e50e5d7cc36b8a8705007207e"
+    },
+    "frontend/libs/components/video-editor/": {
+      "files": 511,
+      "sha256": "154ab06f95f4fb4f3901ece7a1c977823401ff879a78de138150bfe2029bc8e2"
+    },
+    "frontend/apps/artcraft/app/src/styles/": {
+      "files": 3,
+      "sha256": "a50d768c5701c025d2a3aa3123ec35072b2a374ff1a1c46ca8724e8e8194e22c"
+    },
+    "frontend/apps/artcraft/app/src/pages/": {
+      "files": 50,
+      "sha256": "b66d851939ec89d848848b73a71ad0fe976c78daa2d8f5ebbdcfec2e4eb41341"
+    },
+    "frontend/libs/components/button/": {
+      "files": 14,
+      "sha256": "ea4eeea2e40757a5fc63c86dd059d4aa679e7a39581ad2c2e15cd4d9f5f09f21"
+    },
+    "frontend/libs/components/input/": {
+      "files": 12,
+      "sha256": "190199eabf10e9f7148063e7403cd5d5594afe089b2e123af88b14783d2db810"
+    },
+    "frontend/libs/components/modal/": {
+      "files": 10,
+      "sha256": "cdbe9f0c30eff46285d8dc32b9d0440ab3a867b55a4c8a513f7164017bd0a19b"
+    }
+  },
+  "account_and_transport_exceptions": [
+    "frontend/apps/artcraft/app/src/pages/MainApp.tsx",
+    "frontend/apps/artcraft/app/src/pages/PageScene/useTauriPageSceneAdapter.tsx"
+  ]
+}

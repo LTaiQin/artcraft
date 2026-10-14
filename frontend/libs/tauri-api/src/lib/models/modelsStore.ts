@@ -1,3 +1,4 @@
+import { GenerationProvider } from "@storyteller/api-enums";
 // Shared model store: the single source of truth for the model dropdowns.
 //
 // Seeded synchronously from the frontend OVERLAY (`IMAGE_MODELS` / `VIDEO_MODELS`
@@ -11,6 +12,7 @@
 import { create } from "zustand";
 import {
   ImageModel,
+  ModelTag,
   VideoModel,
   IMAGE_MODELS,
   VIDEO_MODELS,
@@ -51,7 +53,17 @@ export const useModelsStore = create<ModelsStoreState>((set, get) => ({
       const { models, providers } = imageResult.value.payload;
       const offered = providers.flatMap((p) => p.models.map((pm) => pm.model));
       const built = buildImageModelsFromListing(IMAGE_MODELS, models, offered);
-      next.imageModels = built;
+      const available = new Set(models.map((model) => model.model));
+      next.imageModels = built.filter((model) => available.has(model.tauriId)).map((model) => new ImageModel({
+        ...model,
+        providers: [GenerationProvider.Artcraft],
+        canEditImages: true,
+        canEditAngles: true,
+        canTextToImage: !model.tauriId.endsWith("_inpaint"),
+        usesInpaintingMask: model.tauriId.endsWith("_inpaint"),
+        editingIsInpainting: model.tauriId.endsWith("_inpaint"),
+        tags: [...model.tags, ModelTag.InstructiveEdit],
+      }));
       console.log(
         `[models] image: backend returned ${models.length} → ${built.length} models shown`,
         built.map((m) => m.tauriId),
@@ -64,7 +76,8 @@ export const useModelsStore = create<ModelsStoreState>((set, get) => ({
       const { models, providers } = videoResult.value.payload;
       const offered = providers.flatMap((p) => p.models.map((pm) => pm.model));
       const built = buildVideoModelsFromListing(VIDEO_MODELS, models, offered);
-      next.videoModels = built;
+      const available = new Set(models.map((model) => model.model));
+      next.videoModels = built.filter((model) => available.has(model.tauriId));
       console.log(
         `[models] video: backend returned ${models.length} → ${built.length} models shown`,
         built.map((m) => m.tauriId),

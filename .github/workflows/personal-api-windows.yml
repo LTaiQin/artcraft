@@ -1,0 +1,79 @@
+name: ArtCraft Original UI - Personal APIs Windows
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - 'crates/desktop/artcraft/**'
+      - 'crates/lib/personal_api/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'script/artcraft/personal-api/**'
+      - '.github/workflows/personal-api-windows.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      CARGO_INCREMENTAL: '0'
+      SQLX_OFFLINE: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: personal-api-windows
+      - name: Verify original editor and style source
+        run: python script/artcraft/personal-api/verify-original-ui.py
+      - name: Test local API protocols and persistence
+        run: cargo test -p personal_api --locked
+      - name: Install original frontend dependencies
+        working-directory: frontend
+        run: npm ci --no-audit --no-fund
+      - name: Build original ArtCraft frontend
+        working-directory: frontend/apps/artcraft
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: npm run build -- --emptyOutDir
+      - name: Build original Tauri desktop
+        env:
+          ARTCRAFT_GIT_SHA: ${{ github.sha }}
+        run: cargo build -p artcraft --release --locked
+      - name: Prepare acceptance fixtures
+        run: node script/artcraft/personal-api/make-fixtures.cjs .local-qa/personal-api-windows/fixtures
+      - name: Test actual Windows application
+        run: node script/artcraft/personal-api/verify-windows.cjs target/release/artcraft.exe
+      - name: Upload acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: personal-api-windows-acceptance
+          path: .local-qa/personal-api-windows
+          if-no-files-found: ignore
+      - name: Build Windows installer
+        working-directory: crates/desktop/artcraft
+        run: |
+          npm exec --yes --package @tauri-apps/cli@2 -- tauri build --bundles nsis -- --locked
+      - name: Publish verified Windows release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force release-personal-api | Out-Null
+          Copy-Item target/release/artcraft.exe release-personal-api/ArtCraft.exe
+          Copy-Item docs/personal-api/README_CN.md release-personal-api/README_CN.md
+          Copy-Item LICENSE-MIT,LICENSE-APACHE,NOTICE release-personal-api/
+          Compress-Archive -Path release-personal-api/* -DestinationPath ArtCraft-Personal-API-0.42.1-Windows-x64.zip
+          $assets = @(Get-ChildItem target/release/bundle/nsis/*-setup.exe | ForEach-Object FullName)
+          $assets += (Resolve-Path ArtCraft-Personal-API-0.42.1-Windows-x64.zip).Path
+          $lines = $assets | ForEach-Object { $h = Get-FileHash $_ -Algorithm SHA256; "$($h.Hash.ToLower())  $(Split-Path $_ -Leaf)" }
+          $lines | Set-Content SHA256SUMS.txt
+          $assets += (Resolve-Path SHA256SUMS.txt).Path
+          gh release create personal-api-v0.42.1 @assets --title "ArtCraft 0.42.1 · 原版界面 / 个人 API" --notes-file docs/personal-api/RELEASE_CN.md --latest --target $env:GITHUB_SHA
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

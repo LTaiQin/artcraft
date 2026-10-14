@@ -70,8 +70,8 @@ export const SettingsModal = ({
     { id: "general" as const, label: "General", icon: SettingsIcon },
     { id: "downloads" as const, label: "Downloads", icon: DownloadIcon },
 
-    { id: "accounts" as const, label: "Accounts", icon: UserIcon },
-    { id: "billing" as const, label: "Plan & Credits", icon: CreditCardIcon },
+    { id: "accounts" as const, label: "Personal APIs", icon: UserIcon },
+    { id: "billing" as const, label: "API Billing", icon: CreditCardIcon },
 
     /* {
       id: "provider_priority" as const,

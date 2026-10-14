@@ -1,3 +1,4 @@
+import { IsDesktopApp } from "@storyteller/tauri-utils";
 // TODO(bt,2025-05-15): Remove this code
 
 /**
@@ -33,5 +34,5 @@ class CdnHostHelper {
 
 // TODO(bt,2025-02-10): Consolidate all of this logic.
 export function GetCdnOrigin() : string {
-  return CdnHostHelper.getInstance().getOrigin();
+  return IsDesktopApp() ? "" : CdnHostHelper.getInstance().getOrigin();
 }

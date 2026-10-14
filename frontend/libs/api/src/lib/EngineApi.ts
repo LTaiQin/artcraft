@@ -1,3 +1,4 @@
+import { FetchProxy as fetch } from "@storyteller/tauri-utils";
 import { ApiManager, ApiResponse, buildSessionHeaders } from "./ApiManager";
 
 export class EngineApi extends ApiManager {

@@ -2,12 +2,12 @@ import type { Config } from "tailwindcss";
 import colors from "tailwindcss/colors";
 
 export default {
-  content: [
+  content: { relative: true, files: [
     "./app/index.html",
     "./app/src/**/*.{js,jsx,ts,tsx}",
     "./app/src/*.{js,jsx,ts,tsx}",
     "../../libs/components/**/*.{js,jsx,ts,tsx}",
-  ],
+  ] },
   theme: {
     extend: {
       fontFamily: {

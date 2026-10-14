@@ -14,6 +14,7 @@ class BucketConfig {
   // TODO: Prevent callers with undefined/null paths
   // TODO pipeline works make more robust....
   getGcsUrl(bucketRelativePath: string | undefined | null): string {
+    if (bucketRelativePath && /^(https?:|asset:)/.test(bucketRelativePath)) return bucketRelativePath;
     let path = bucketRelativePath;
     if (path !== undefined && path !== null && !path.startsWith("/")) {
       path = "/" + path;
@@ -27,6 +28,7 @@ class BucketConfig {
     width?: number,
     quality?: number,
   ): string {
+    if (/^(https?:|asset:)/.test(bucketRelativePath)) return bucketRelativePath;
     const cndBasePath = environmentVariables.values.CDN_API;
     const path = bucketRelativePath?.startsWith("/")
       ? bucketRelativePath

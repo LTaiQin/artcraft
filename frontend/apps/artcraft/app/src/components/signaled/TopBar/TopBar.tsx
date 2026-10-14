@@ -538,86 +538,21 @@ export const TopBar = ({ pageName }: Props) => {
               <PopoverMenu
                 position="bottom"
                 align="end"
-                triggerIcon={
-                  <CreditsCoinWithStatus iconStatus={creditsIconStatus} />
-                }
-                triggerLabel={
-                  <span className="whitespace-nowrap text-sm font-medium">
-                    {sumTotalCredits.toLocaleString()}
-                  </span>
-                }
+                triggerIcon={<CoinsIcon />}
+                triggerLabel={<span className="whitespace-nowrap text-sm font-medium">API</span>}
                 buttonClassName="h-8 px-3 ps-2.5 bg-transparent hover:bg-white/10 border border-white/15 hover:border-white/30 shadow-none text-white/80 rounded-[3px] gap-1.5"
                 panelClassName="mt-2 bg-[#101014] border border-white/15 text-white rounded-[3px]"
               >
                 {(close) => (
                   <div className="w-72 p-3 text-white">
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="text-sm font-medium text-white/70">
-                        Your credit balance
-                      </span>
-                      <button
-                        className="text-sm font-medium text-primary transition-colors hover:text-primary-300"
-                        onClick={() => {
-                          close();
-                          toggleCreditsModal();
-                        }}
-                      >
-                        Buy credits
-                      </button>
-                    </div>
-                    <div className="flex items-center gap-2 text-3xl font-semibold tracking-tight text-white">
-                      <CoinsIcon className="text-xl text-primary" />
-                      {sumTotalCredits.toLocaleString()}
-                    </div>
-
-                    <button
-                      className="mt-2 flex items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-white/50 transition-colors hover:text-white"
-                      onClick={() => {
-                        close();
-                        useCostBreakdownModalStore.getState().openModal();
-                      }}
-                    >
-                      <CalculatorIcon />
-                      Cost calculator
-                    </button>
-
-                    <div className="mt-3 flex gap-2">
-                      <Button
-                        variant="secondary"
-                        className="h-9 grow"
-                        onClick={() => {
-                          close();
-                          handleOpenBillingSettings();
-                        }}
-                      >
-                        See details
-                      </Button>
-                      <Button
-                        variant="primary"
-                        className="h-9 grow"
-                        onClick={() => {
-                          close();
-                          toggleSubscriptionModal();
-                        }}
-                        icon={GemIcon}
-                      >
-                        Support
-                      </Button>
-                    </div>
+                    <div className="mb-2 text-sm font-medium text-white/70">Personal API workspace</div>
+                    <p className="text-sm text-white/60">生成请求使用自己的 API，无需 ArtCraft 账号。</p>
+                    <Button variant="secondary" className="mt-3 h-9 w-full" onClick={() => {
+                      close(); setSettingsSection("accounts"); setIsSettingsModalOpen(true);
+                    }}>Configure APIs</Button>
                   </div>
                 )}
               </PopoverMenu>
-
-              {!hasPaidPlan && (
-                <Button
-                  variant="primary"
-                  icon={GemIcon}
-                  onClick={toggleSubscriptionModal}
-                  className="h-8 px-3"
-                >
-                  Upgrade
-                </Button>
-              )}
 
               <TaskQueue />
 
