@@ -31,3 +31,4 @@ pub mod estimate_splat_cost_command;
 pub mod generate_mesh_command;
 pub mod generate_splat_command;
 pub mod enqueue_image_bg_removal_command;
+pub mod tasks_nuke_all_command;

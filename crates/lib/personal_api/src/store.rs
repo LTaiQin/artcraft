@@ -232,7 +232,9 @@ impl Store {
   pub fn update_job(&self, job: &Job) -> Result<()> {
     let mut data = self.state.lock().map_err(|_| "本地状态忙碌")?;
     let target = data.jobs.iter_mut().find(|j| j.id == job.id).ok_or("任务不存在")?;
+    let dismissed = target.dismissed;
     *target = job.clone();
+    target.dismissed |= dismissed;
     self.write_data(&data)
   }
   pub fn jobs(&self) -> Result<Vec<Job>> {
